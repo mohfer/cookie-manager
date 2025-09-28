@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cookie extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'domain',
+        'name',
+        'value',
+    ];
 
     protected $casts = [
         'value' => 'array',
