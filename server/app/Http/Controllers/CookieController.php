@@ -12,7 +12,7 @@ class CookieController extends Controller
 
     public function index()
     {
-        $cookies = Cookie::all();
+        $cookies = Cookie::orderBy('name', 'asc')->get();
         return $this->sendResponse($cookies, 'Cookies retrieved successfully');
     }
 
