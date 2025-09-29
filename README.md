@@ -1,1 +1,1 @@
-# Manage cookies with TOTP support
+# Cookie Manager
