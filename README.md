@@ -14,6 +14,7 @@ A full-stack cookie management application with a **Laravel 12 API** backend and
 - **React 19** with React Router v7
 - **Tailwind CSS v4**
 - **Vite 7** (Bun)
+- Custom hooks pattern (`useAuth`, `useCookies`) with shared API client
 
 ## Getting Started
 
@@ -46,6 +47,6 @@ bun run dev
 | GET | `/api/user` | Yes | Get authenticated user |
 | GET | `/api/cookies` | Yes | List all cookies |
 | POST | `/api/cookies` | Yes | Create a cookie |
-| GET | `/api/cookies/{id}` | Yes | Get a cookie |
-| PUT | `/api/cookies/{id}` | Yes | Update a cookie |
-| DELETE | `/api/cookies/{id}` | Yes | Delete a cookie |
+| GET | `/api/cookies/{cookie}` | Yes | Get a cookie |
+| PUT | `/api/cookies/{cookie}` | Yes | Update a cookie |
+| DELETE | `/api/cookies/{cookie}` | Yes | Delete a cookie |
