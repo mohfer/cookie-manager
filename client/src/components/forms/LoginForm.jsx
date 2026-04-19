@@ -1,36 +1,29 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { loginApi } from '../../api/auth'
+import { useAuth } from '../../hooks/useAuth'
 import LoadingSpinner from '../ui/LoadingSpinner'
 
 const LoginForm = () => {
-    const navigate = useNavigate()
+    const { login, loading } = useAuth()
     const [showPassword, setShowPassword] = useState(false)
     const [form, setForm] = useState({ username: '', password: '' })
-    const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
     const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
     const onSubmit = async (e) => {
         e.preventDefault()
-        
+
         if (!form.username.trim() || !form.password.trim()) {
             setError('All fields are required')
             return
         }
 
-        setLoading(true)
         setError(null)
 
         try {
-            const token = await loginApi(form.username, form.password)
-            localStorage.setItem('authToken', token)
-            navigate('/dashboard')
+            await login(form.username, form.password)
         } catch (err) {
-            setError(err.message || "Login gagal")
-        } finally {
-            setLoading(false)
+            setError(err.message || 'Login failed')
         }
     }
 

@@ -1,44 +1,31 @@
-const API_URL = import.meta.env.VITE_API_URL
-
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('authToken')
-    return {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
-    }
-}
+import { apiFetch } from './client'
 
 export const loginApi = async (username, password) => {
-    const res = await fetch(`${API_URL}/api/login`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
         },
         body: JSON.stringify({ username, password }),
     })
 
     if (!res.ok) {
-        const errData = await res.json()
+        const errData = await res.json().catch(() => ({}))
         throw new Error(errData.message || 'Login failed')
     }
 
     const data = await res.json()
-    return data.data.token
+    return data.data
 }
 
 export const logoutApi = async () => {
-    const res = await fetch(`${API_URL}/api/logout`, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-    })
-
-    if (!res.ok) {
-        const errData = await res.json()
-        throw new Error(errData.message || 'Logout failed')
-    }
-
+    await apiFetch('/api/logout', { method: 'POST' })
     return true
 }
 
+export const getUserApi = async () => {
+    const res = await apiFetch('/api/user')
+    const data = await res.json()
+    return data.data
+}

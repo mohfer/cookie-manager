@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import toast, { Toaster } from 'react-hot-toast'
+import { useState, useMemo } from 'react'
+import { Toaster } from 'react-hot-toast'
 import Navbar from '../components/Navbar'
 import SearchAddBar from '../components/SearchAddBar'
 import CookieCard from '../components/cards/CookieCard'
@@ -7,161 +7,72 @@ import AddCookieModal from '../components/modals/AddCookieModal'
 import UpdateCookieModal from '../components/modals/UpdateCookieModal'
 import DeleteConfirmModal from '../components/modals/DeleteConfirmModal'
 import SkeletonCard from '../components/ui/SkeletonCard'
-import { getCookiesApi, createCookieApi, updateCookieApi, deleteCookieApi } from '../api/cookies'
+import { useCookies } from '../hooks/useCookies'
 
 const Dashboard = () => {
-    const [isAddCookieModalOpen, setIsAddCookieModalOpen] = useState(false)
-    const [isUpdateCookieModalOpen, setIsUpdateCookieModalOpen] = useState(false)
-    const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false)
+    const { cookies, fetchLoading, mutating, addCookie, updateCookie, deleteCookie } = useCookies()
+
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [selectedCookie, setSelectedCookie] = useState(null)
     const [searchValue, setSearchValue] = useState('')
-    const [loading, setLoading] = useState(false)
-    const [fetchLoading, setFetchLoading] = useState(true)
-    const [cookies, setCookies] = useState([])
 
-    useEffect(() => {
-        fetchCookies()
-    }, [])
+    const filteredCookies = useMemo(() => {
+        if (!searchValue) return cookies
+        const q = searchValue.toLowerCase()
+        return cookies.filter(c =>
+            (c.websiteName || c.name || '').toLowerCase().includes(q) ||
+            (c.domain || '').toLowerCase().includes(q)
+        )
+    }, [cookies, searchValue])
 
-    const fetchCookies = async () => {
-        setFetchLoading(true)
-        try {
-            const cookiesData = await getCookiesApi()
-
-            console.log('Fetched cookies data:', cookiesData)
-
-            setCookies(cookiesData)
-        } catch (error) {
-            console.error('Fetch cookies error:', error)
-            toast.error(error.message || 'Failed to fetch cookies')
-        } finally {
-            setFetchLoading(false)
-        }
+    const handleAdd = async (data) => {
+        await addCookie({ name: data.name, domain: data.domain, value: data.value })
+        setIsAddModalOpen(false)
     }
 
-    const handleAddClick = () => {
-        setIsAddCookieModalOpen(true)
-    }
-
-    const handleCloseAddCookieModal = () => {
-        setIsAddCookieModalOpen(false)
-    }
-
-    const handleUpdateClick = (cookie) => {
-        setSelectedCookie(cookie)
-        setIsUpdateCookieModalOpen(true)
-    }
-
-    const handleCloseUpdateCookieModal = () => {
-        setIsUpdateCookieModalOpen(false)
+    const handleUpdate = async (data) => {
+        await updateCookie(selectedCookie.id, { name: data.name, domain: data.domain, value: data.value })
+        setIsUpdateModalOpen(false)
         setSelectedCookie(null)
     }
 
-    const handleDeleteClick = (cookie) => {
-        setSelectedCookie(cookie)
-        setIsDeleteConfirmModalOpen(true)
-    }
-
-    const handleCloseDeleteConfirmModal = () => {
-        setIsDeleteConfirmModalOpen(false)
+    const handleDelete = async () => {
+        await deleteCookie(selectedCookie.id)
+        setIsDeleteModalOpen(false)
         setSelectedCookie(null)
     }
 
-    const handleAddCookie = async (cookieData) => {
-        setLoading(true)
-        try {
-            const newCookie = await createCookieApi({
-                name: cookieData.name,
-                domain: cookieData.domain,
-                value: cookieData.value
-            })
-            setCookies(prev => [...prev, newCookie])
-            setIsAddCookieModalOpen(false)
-            toast.success('Cookie added successfully!')
-        } catch (error) {
-            toast.error(error.message || 'Failed to add cookie')
-            throw error
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleUpdateCookie = async (cookieData) => {
-        setLoading(true)
-        try {
-            const updatedCookie = await updateCookieApi(selectedCookie.id, {
-                name: cookieData.name,
-                domain: cookieData.domain,
-                value: cookieData.value
-            })
-            setCookies(prev => prev.map(cookie =>
-                cookie.id === selectedCookie.id ? updatedCookie : cookie
-            ))
-            setIsUpdateCookieModalOpen(false)
-            toast.success('Cookie updated successfully!')
-        } catch (error) {
-            toast.error(error.message || 'Failed to update cookie')
-            throw error
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleDeleteCookie = async () => {
-        setLoading(true)
-        try {
-            await deleteCookieApi(selectedCookie.id)
-            setCookies(prev => prev.filter(cookie => cookie.id !== selectedCookie.id))
-            setIsDeleteConfirmModalOpen(false)
-            toast.success('Cookie deleted successfully!')
-        } catch (error) {
-            toast.error(error.message || 'Failed to delete cookie')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const filteredCookies = cookies.filter(cookie => {
-        const websiteName = cookie.websiteName || cookie.name || ''
-        const domain = cookie.domain || ''
-
-        return websiteName.toLowerCase().includes(searchValue.toLowerCase()) ||
-            domain.toLowerCase().includes(searchValue.toLowerCase())
-    })
+    const openUpdate = (cookie) => { setSelectedCookie(cookie); setIsUpdateModalOpen(true) }
+    const openDelete = (cookie) => { setSelectedCookie(cookie); setIsDeleteModalOpen(true) }
 
     return (
         <>
             <Navbar />
-            <div className='pt-16 min-h-screen bg-gray-50 dark:bg-zinc-900'>
+            <div className="pt-16 min-h-screen bg-gray-50 dark:bg-zinc-900">
                 <SearchAddBar
-                    onAddClick={handleAddClick}
+                    onAddClick={() => setIsAddModalOpen(true)}
                     searchValue={searchValue}
                     onSearchChange={setSearchValue}
                 />
-                <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
-                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {fetchLoading ? (
-                            Array.from({ length: 8 }).map((_, index) => (
-                                <SkeletonCard key={index} />
-                            ))
+                            Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
                         ) : filteredCookies.length > 0 ? (
                             filteredCookies.map(cookie => (
                                 <CookieCard
                                     key={cookie.id}
                                     cookie={cookie}
-                                    onUpdate={() => handleUpdateClick(cookie)}
-                                    onDelete={() => handleDeleteClick(cookie)}
+                                    onUpdate={() => openUpdate(cookie)}
+                                    onDelete={() => openDelete(cookie)}
                                 />
                             ))
                         ) : (
                             <div className="col-span-full text-center py-12">
-                                <div className="text-gray-500 dark:text-gray-400">
-                                    <svg className="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                    </svg>
-                                    <p className="text-lg font-medium">No cookies found</p>
-                                    <p className="text-sm">Start by adding your first cookie</p>
-                                </div>
+                                <p className="text-lg font-medium text-gray-500 dark:text-gray-400">No cookies found</p>
+                                <p className="text-sm text-gray-400 dark:text-gray-500">Start by adding your first cookie</p>
                             </div>
                         )}
                     </div>
@@ -170,28 +81,9 @@ const Dashboard = () => {
 
             <Toaster position="top-right" />
 
-            <AddCookieModal
-                isOpen={isAddCookieModalOpen}
-                onClose={handleCloseAddCookieModal}
-                onSubmit={handleAddCookie}
-                loading={loading}
-            />
-
-            <UpdateCookieModal
-                isOpen={isUpdateCookieModalOpen}
-                onClose={handleCloseUpdateCookieModal}
-                onSubmit={handleUpdateCookie}
-                loading={loading}
-                cookieData={selectedCookie}
-            />
-
-            <DeleteConfirmModal
-                isOpen={isDeleteConfirmModalOpen}
-                onClose={handleCloseDeleteConfirmModal}
-                onConfirm={handleDeleteCookie}
-                loading={loading}
-                cookieName={selectedCookie?.websiteName || selectedCookie?.name || ''}
-            />
+            <AddCookieModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onSubmit={handleAdd} loading={mutating} />
+            <UpdateCookieModal isOpen={isUpdateModalOpen} onClose={() => { setIsUpdateModalOpen(false); setSelectedCookie(null) }} onSubmit={handleUpdate} loading={mutating} cookieData={selectedCookie} />
+            <DeleteConfirmModal isOpen={isDeleteModalOpen} onClose={() => { setIsDeleteModalOpen(false); setSelectedCookie(null) }} onConfirm={handleDelete} loading={mutating} cookieName={selectedCookie?.websiteName || selectedCookie?.name || ''} />
         </>
     )
 }

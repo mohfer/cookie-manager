@@ -60,13 +60,19 @@ bun run lint               # ESLint
 
 - **Framework**: React 19 with React Router v7, Tailwind CSS v4, Vite 7
 - **Package manager**: Bun (has `bun.lock`, no `package-lock.json`)
-- **Auth flow**: Login stores token in `localStorage` key `authToken`, sent as Bearer token. 401 responses auto-clear the token.
+- **Auth flow**: Login stores token in `localStorage` key `authToken`, sent as Bearer token. 401 responses auto-clear the token via shared `apiFetch` helper.
 - **API base URL**: `VITE_API_URL` env var (default `http://localhost:8000`), set in `client/.env`
+- **Architecture**: Custom hooks pattern — components are thin, business logic lives in hooks:
+  - `src/api/client.js` — shared `apiFetch` wrapper (handles auth headers, 401 auto-clear)
+  - `src/api/auth.js` — `loginApi`, `logoutApi`, `getUserApi`
+  - `src/api/cookies.js` — `getCookiesApi`, `createCookieApi`, `updateCookieApi`, `deleteCookieApi`
+  - `src/hooks/useAuth.js` — `login`, `logout` (calls API then clears token), `isAuthenticated`, `loading`
+  - `src/hooks/useCookies.js` — `cookies`, `addCookie`, `updateCookie`, `deleteCookie`, `fetchLoading`, `mutating`
 - **Routing**: 3 routes — `/` (Home), `/login` (public only), `/dashboard` (protected)
 - **Key files**:
-  - `src/api/cookies.js` — all cookie API calls with auth headers
-  - `src/api/auth.js` — login/logout API calls
-  - `src/pages/Dashboard.jsx` — main page with cookie CRUD, search filtering, modals
+  - `src/pages/Dashboard.jsx` — uses `useCookies` hook, manages modals and search filtering
+  - `src/components/Navbar.jsx` — uses `useAuth` hook for logout
+  - `src/components/forms/LoginForm.jsx` — uses `useAuth` hook for login
   - `src/components/auth/ProtectedRoute.jsx` — redirects unauthenticated users
   - `src/components/auth/PublicRoute.jsx` — redirects authenticated users away from login
 
