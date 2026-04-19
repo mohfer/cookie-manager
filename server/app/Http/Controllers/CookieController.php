@@ -1,73 +1,48 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCookieRequest;
+use App\Http\Requests\UpdateCookieRequest;
 use App\Models\Cookie;
+use App\Services\CookieService;
 use App\Traits\ApiResponse;
-use Illuminate\Http\Request;
 
-class CookieController extends Controller
+final class CookieController extends Controller
 {
     use ApiResponse;
 
+    public function __construct(private readonly CookieService $cookieService) {}
+
     public function index()
     {
-        $cookies = Cookie::orderBy('name', 'asc')->get();
-        return $this->sendResponse($cookies, 'Cookies retrieved successfully');
+        return $this->sendResponse($this->cookieService->getAll(), 'Cookies retrieved successfully');
     }
 
-    public function store(Request $request)
+    public function store(StoreCookieRequest $request)
     {
-        $validated = $request->validate([
-            'domain' => 'required|string|unique:cookies,domain',
-            'name' => 'required|string|unique:cookies,name',
-            'value' => 'required|array',
-        ]);
-
-        $cookie = Cookie::create($validated);
+        $cookie = $this->cookieService->create($request->validated());
 
         return $this->sendResponse($cookie, 'Cookie created successfully', 201);
     }
 
-    public function show($id)
+    public function show(Cookie $cookie)
     {
-        $cookie = Cookie::find($id);
-
-        if (!$cookie) {
-            return $this->sendError('Cookie not found', 404);
-        }
-
         return $this->sendResponse($cookie, 'Cookie retrieved successfully');
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateCookieRequest $request, Cookie $cookie)
     {
-        $cookie = Cookie::find($id);
-
-        if (!$cookie) {
-            return $this->sendError('Cookie not found', 404);
-        }
-
-        $validated = $request->validate([
-            'domain' => 'sometimes|required|string|unique:cookies,domain,' . $id,
-            'name' => 'sometimes|required|string|unique:cookies,name,' . $id,
-            'value' => 'sometimes|required|array',
-        ]);
-
-        $cookie->update($validated);
+        $cookie = $this->cookieService->update($cookie, $request->validated());
 
         return $this->sendResponse($cookie, 'Cookie updated successfully');
     }
 
-    public function destroy($id)
+    public function destroy(Cookie $cookie)
     {
-        $cookie = Cookie::find($id);
-
-        if (!$cookie) {
-            return $this->sendError('Cookie not found', 404);
-        }
-
-        $cookie->delete();
+        $this->cookieService->delete($cookie);
 
         return $this->sendResponse(null, 'Cookie deleted successfully');
     }
