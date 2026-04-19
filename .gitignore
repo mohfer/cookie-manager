@@ -1,0 +1,57 @@
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.nova
+.zed
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment
+.env
+.env.backup
+.env.production
+
+# OMC
+.omc/
+
+# Client
+client/node_modules
+client/dist
+client/dist-ssr
+*.local
+
+# Server
+server/.phpactor.json
+server/.phpunit.result.cache
+server/.fleet
+server/.phpunit.cache
+server/auth.json
+server/node_modules
+server/public/build
+server/public/hot
+server/public/storage
+server/storage/*.key
+server/storage/pail
+server/vendor
+Homestead.json
+Homestead.yaml
+
+# FrankenPHP
+**/caddy
+frankenphp
