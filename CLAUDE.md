@@ -39,12 +39,20 @@ bun run lint               # ESLint
   - `users` — has `username` (unique), `name`, `email`, `password`
   - `cookies` — has `domain` (unique), `name` (unique), `value` (JSON), `path` (default `/`)
 - **API response convention**: All responses go through `App\Traits\ApiResponse` — `{ code, message, data }` JSON format
-- **Routing**: `routes/api.php` defines all endpoints:
+- **Architecture**: Service pattern — controllers are thin, delegate to service classes:
+  - Controllers: accept validated requests, call service, return JSON via `ApiResponse`
+  - Services (`app/Services/`): contain business logic, interact with Eloquent models
+  - Form Requests (`app/Http/Requests/`): handle validation rules
+  - Uses `final class`, `declare(strict_types=1)`, readonly constructor properties
+- **Routing**: `routes/api.php` defines all endpoints with route-model binding (`{cookie}` param):
   - Public: `POST /api/login`, `POST /api/register`
   - Auth-protected (Sanctum bearer token): `/api/cookies` CRUD, `/api/logout`, `/api/user`
 - **Key files**:
-  - `app/Http/Controllers/AuthController.php` — login returns `{ user, token }`
-  - `app/Http/Controllers/CookieController.php` — full CRUD for cookies
+  - `app/Http/Controllers/AuthController.php` — delegates to `AuthService`
+  - `app/Http/Controllers/CookieController.php` — delegates to `CookieService`
+  - `app/Services/AuthService.php` — login/logout/user logic
+  - `app/Services/CookieService.php` — cookie CRUD logic
+  - `app/Http/Requests/LoginRequest.php`, `StoreCookieRequest.php`, `UpdateCookieRequest.php`
   - `app/Models/Cookie.php` — casts `value` to array (JSON column)
   - `app/Traits/ApiResponse.php` — `sendResponse()` and `sendError()` helpers
 
@@ -68,3 +76,4 @@ bun run lint               # ESLint
 - Frontend components under `src/components/` organized by type: `auth/`, `cards/`, `forms/`, `modals/`, `ui/`
 - Cookie `value` is stored as JSON in the database and cast to array in Eloquent
 - CORS is open (`*`) for `api/*` paths — configured in `config/cors.php`
+- Server classes use `final class`, `declare(strict_types=1)`, and readonly constructor promotion

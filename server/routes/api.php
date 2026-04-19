@@ -13,7 +13,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/cookies', [CookieController::class, 'index']);
     Route::post('/cookies', [CookieController::class, 'store']);
-    Route::get('/cookies/{id}', [CookieController::class, 'show']);
-    Route::put('/cookies/{id}', [CookieController::class, 'update']);
-    Route::delete('/cookies/{id}', [CookieController::class, 'destroy']);
+    Route::get('/cookies/{cookie}', [CookieController::class, 'show']);
+    Route::put('/cookies/{cookie}', [CookieController::class, 'update']);
+    Route::delete('/cookies/{cookie}', [CookieController::class, 'destroy']);
 });
