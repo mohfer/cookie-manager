@@ -1,5 +1,8 @@
 import { useEffect } from 'react'
+import { X } from 'lucide-react'
 import AddCookieForm from '../forms/AddCookieForm'
+import { Button } from '../ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 
 const AddCookieModal = ({ isOpen, onClose, onSubmit, loading = false }) => {
     useEffect(() => {
@@ -30,34 +33,31 @@ const AddCookieModal = ({ isOpen, onClose, onSubmit, loading = false }) => {
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-white/20 dark:bg-black/20"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
             onClick={handleBackdropClick}
             onKeyDown={handleKeyDown}
             tabIndex={-1}
         >
-            <div className="w-full max-w-md mx-auto bg-white dark:bg-zinc-950 rounded-xl border border-gray-200 dark:border-gray-800 shadow-2xl">
-                <div className="p-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                            Add New Cookie
-                        </h2>
-                        <button
-                            onClick={onClose}
-                            className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-lg transition-colors"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-
+            <Card className="mx-auto w-full max-w-md rounded-3xl">
+                <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
+                    <CardTitle className="text-xl">Add New Cookie</CardTitle>
+                    <Button
+                        onClick={onClose}
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                    >
+                        <X className="size-4" />
+                    </Button>
+                </CardHeader>
+                <CardContent>
                     <AddCookieForm
                         onSubmit={onSubmit}
                         loading={loading}
                         onCancel={onClose}
                     />
-                </div>
-            </div>
+                </CardContent>
+            </Card>
         </div>
     )
 }

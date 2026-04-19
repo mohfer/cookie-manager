@@ -50,14 +50,14 @@ const Dashboard = () => {
     return (
         <>
             <Navbar />
-            <div className="pt-16 min-h-screen bg-gray-50 dark:bg-zinc-900">
+            <div className="min-h-screen pt-16">
                 <SearchAddBar
                     onAddClick={() => setIsAddModalOpen(true)}
                     searchValue={searchValue}
                     onSearchChange={setSearchValue}
                 />
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {fetchLoading ? (
                             Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
                         ) : filteredCookies.length > 0 ? (
@@ -70,9 +70,9 @@ const Dashboard = () => {
                                 />
                             ))
                         ) : (
-                            <div className="col-span-full text-center py-12">
-                                <p className="text-lg font-medium text-gray-500 dark:text-gray-400">No cookies found</p>
-                                <p className="text-sm text-gray-400 dark:text-gray-500">Start by adding your first cookie</p>
+                            <div className="col-span-full rounded-3xl border border-dashed border-black/20 bg-white/65 py-16 text-center dark:border-white/20 dark:bg-zinc-950/60">
+                                <p className="text-lg font-semibold text-black dark:text-white">No cookies found</p>
+                                <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Start by adding your first cookie.</p>
                             </div>
                         )}
                     </div>

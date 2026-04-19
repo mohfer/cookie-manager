@@ -2,7 +2,7 @@ import LoginCard from "../components/cards/LoginCard"
 
 const Login = () => {
     return (
-        <div className='min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-900 px-4'>
+        <div className='flex min-h-screen items-center justify-center px-4 py-16'>
             <LoginCard />
         </div>
     )

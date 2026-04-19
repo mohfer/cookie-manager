@@ -1,4 +1,8 @@
 import React from 'react'
+import toast from 'react-hot-toast'
+import { Copy, Pencil, Trash2 } from 'lucide-react'
+import { Button } from '../ui/button'
+import { Card, CardContent } from '../ui/card'
 
 const CookieCard = ({ cookie, onUpdate, onDelete }) => {
     const [imgError, setImgError] = React.useState(false);
@@ -15,57 +19,82 @@ const CookieCard = ({ cookie, onUpdate, onDelete }) => {
         }
     }
 
+    const handleCopyValue = async () => {
+        try {
+            const rawValue = cookie?.value
+            const textValue = typeof rawValue === 'string'
+                ? rawValue
+                : JSON.stringify(rawValue ?? '', null, 2)
+
+            await navigator.clipboard.writeText(textValue)
+            toast.success('Cookie value copied')
+        } catch {
+            toast.error('Failed to copy cookie value')
+        }
+    }
+
     return (
-        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-gray-800 rounded-xl shadow-lg p-4 hover:shadow-xl transition-shadow">
-            <div className="grid grid-cols-5 gap-4 items-center">
-                <div className="flex justify-center">
-                    <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center overflow-hidden">
-                        {cookie && !imgError ? (
-                            <img
-                                src={`https://${cookie.domain}/favicon.ico`}
-                                alt={`${cookie.websiteName} icon`}
-                                className="w-8 h-8 object-contain"
-                                onError={() => setImgError(true)}
-                            />
-                        ) : (
-                            <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded flex items-center justify-center text-xs font-semibold text-gray-600 dark:text-gray-300">
-                                {(cookie?.websiteName || cookie?.name)?.charAt(0)?.toUpperCase() || '?'}
-                            </div>
-                        )}
+        <Card className="rounded-3xl transition-transform duration-200 hover:-translate-y-0.5">
+            <CardContent className="p-4">
+                <div className="grid grid-cols-5 items-center gap-4">
+                    <div className="flex justify-center">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-black/10 bg-black/5 p-1 dark:border-white/20 dark:bg-white/10">
+                            {cookie && !imgError ? (
+                                <img
+                                    src={`https://${cookie.domain}/favicon.ico`}
+                                    alt={`${cookie.websiteName} icon`}
+                                    className="h-full w-full rounded-full object-cover"
+                                    onError={() => setImgError(true)}
+                                />
+                            ) : (
+                                <div className="flex h-full w-full items-center justify-center rounded-full bg-black text-xs font-semibold text-white dark:bg-white dark:text-black">
+                                    {(cookie?.websiteName || cookie?.name)?.charAt(0)?.toUpperCase() || '?'}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="col-span-3">
+                        <h3 className="truncate text-sm font-semibold text-black dark:text-white">
+                            {cookie?.websiteName || cookie?.name || 'Unknown Website'}
+                        </h3>
+                        <p className="mt-1 truncate text-xs text-zinc-600 dark:text-zinc-400">
+                            {cookie?.domain || 'unknown.com'}
+                        </p>
+                    </div>
+
+                    <div className="flex justify-end gap-1.5 pl-2">
+                        <Button
+                            onClick={handleCopyValue}
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full px-2"
+                            title="Copy cookie value"
+                        >
+                            <Copy className="size-4" />
+                        </Button>
+                        <Button
+                            onClick={handleUpdate}
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full px-2"
+                            title="Update cookie"
+                        >
+                            <Pencil className="size-4" />
+                        </Button>
+                        <Button
+                            onClick={handleDelete}
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full px-2"
+                            title="Delete cookie"
+                        >
+                            <Trash2 className="size-4" />
+                        </Button>
                     </div>
                 </div>
-
-                <div className="col-span-3">
-                    <h3 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
-                        {cookie?.websiteName || cookie?.name || 'Unknown Website'}
-                    </h3>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate mt-1">
-                        {cookie?.domain || 'unknown.com'}
-                    </p>
-                </div>
-
-                <div className="flex justify-end gap-2">
-                    <button
-                        onClick={handleUpdate}
-                        className="p-2 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                        title="Update cookie"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                    </button>
-                    <button
-                        onClick={handleDelete}
-                        className="p-2 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                        title="Delete cookie"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     )
 }
 

@@ -1,22 +1,26 @@
-import React from 'react'
+import { Plus } from 'lucide-react'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
 
 const SearchAddBar = ({ onAddClick, searchValue, onSearchChange }) => {
     return (
-        <div className="w-full max-w-4xl mx-auto mt-6 px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-                <input
+        <div className="mx-auto mt-6 w-full max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-stretch gap-3 rounded-2xl border border-black/10 bg-white/75 p-3 backdrop-blur-sm dark:border-white/15 dark:bg-zinc-950/70 sm:flex-row sm:items-center sm:gap-4">
+                <Input
                     type="text"
                     placeholder="Search cookies..."
                     value={searchValue}
                     onChange={(e) => onSearchChange(e.target.value)}
-                    className="flex-1 h-11 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent dark:bg-zinc-950 dark:border-gray-700 dark:text-white dark:focus:ring-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors shadow-lg"
+                    className="h-10 rounded-full"
                 />
-                <button
+
+                <Button
                     onClick={onAddClick}
-                    className="w-full sm:w-auto sm:min-w-[140px] h-10 bg-zinc-950 text-white text-sm font-medium rounded-lg hover:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 dark:bg-white dark:text-black dark:hover:bg-gray-100 dark:focus:ring-white transition-colors shadow-lg"
+                    className="h-10 w-full rounded-full sm:w-auto"
                 >
+                    <Plus className="size-4" />
                     Add Cookie
-                </button>
+                </Button>
             </div>
         </div>
     )

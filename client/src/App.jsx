@@ -7,30 +7,32 @@ import PublicRoute from './components/auth/PublicRoute'
 
 const App = () => {
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <Home />
-        }
-      />
-      <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+    <div className="relative min-h-screen">
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Home />
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </div>
   )
 }
 

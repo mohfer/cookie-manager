@@ -1,4 +1,25 @@
 import { useNavigate } from 'react-router-dom'
+import { ArrowRight, Cookie, Repeat2, ShieldCheck } from 'lucide-react'
+import { Button } from '../components/ui/button'
+import { Card, CardContent, CardDescription, CardTitle } from '../components/ui/card'
+
+const highlights = [
+    {
+        title: 'Easy Management',
+        description: 'Manage all your cookies in one clean and fast dashboard.',
+        icon: Cookie,
+    },
+    {
+        title: 'Import & Export',
+        description: 'Transfer cookies across browsers with a simpler workflow.',
+        icon: Repeat2,
+    },
+    {
+        title: 'Secure Storage',
+        description: 'Store cookie data in a structured format for safer access and quicker lookup.',
+        icon: ShieldCheck,
+    },
+]
 
 const Home = () => {
     const navigate = useNavigate()
@@ -8,72 +29,54 @@ const Home = () => {
     }
 
     return (
-        <div className='min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-900 px-4 py-12 md:py-8'>
-            <div className='max-w-4xl mx-auto text-center'>
-                <div className='space-y-6'>
-                    <div className='mb-6 md:mb-8'>
-                        <h1 className='text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4'>
-                            Cookie Manager
-                        </h1>
-                        <div className='w-20 h-1 bg-zinc-950 dark:bg-white mx-auto rounded-full'></div>
-                    </div>
-
-                    <h2 className='text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-800 dark:text-gray-200 mb-4 md:mb-6'>
-                        Manage Your Cookies Easily
-                    </h2>
-
-                    <p className='text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6 md:mb-8'>
-                        Take control of your browser cookies with our powerful extension.
-                        Export, import, and manage cookies across different browsers effortlessly.
+        <div className='relative flex min-h-screen items-center px-4 py-20'>
+            <div className='mx-auto w-full max-w-6xl'>
+                <div className='mx-auto max-w-3xl text-center'>
+                    <p className='inline-flex rounded-full border border-black/10 bg-white/70 px-4 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-zinc-600 dark:border-white/20 dark:bg-zinc-950/70 dark:text-zinc-400'>
+                        Cookie Workspace
+                    </p>
+                    <h1 className='mt-6 text-4xl font-extrabold tracking-tight text-black sm:text-6xl dark:text-white'>
+                        Cookie Manager
+                    </h1>
+                    <p className='mx-auto mt-5 max-w-2xl text-base text-zinc-600 sm:text-lg dark:text-zinc-400'>
+                        Monochrome, fast, and focused. Manage browser cookies without distractions using a clean modern interface.
                     </p>
 
-                    <div className='flex flex-col sm:flex-row gap-4 justify-center items-center mt-8 md:mt-10'>
-                        <button
+                    <div className='mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row'>
+                        <Button
                             disabled
-                            className='w-full sm:w-auto px-8 py-3 text-base font-medium text-gray-400 bg-gray-300 rounded-lg cursor-not-allowed dark:bg-gray-700 dark:text-gray-500 shadow-lg opacity-60'
+                            variant='outline'
+                            size='lg'
+                            className='w-full cursor-not-allowed rounded-full opacity-70 sm:w-auto'
                         >
-                            Download Extension (Coming Soon)
-                        </button>
-
-                        <button
+                            Download Extension (Soon)
+                        </Button>
+                        <Button
                             onClick={handleLogin}
-                            className='w-full sm:w-auto px-8 py-3 text-base font-medium text-gray-900 bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-zinc-950 dark:text-white dark:border-gray-800 dark:hover:bg-zinc-900 dark:focus:ring-gray-400 transition-colors shadow-lg'
+                            size='lg'
+                            className='w-full rounded-full sm:w-auto'
                         >
                             Login
-                        </button>
+                            <ArrowRight className='size-4' />
+                        </Button>
                     </div>
+                </div>
 
-                    <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 md:mt-16'>
-                        <div className='p-6 rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-zinc-950 shadow-lg'>
-                            <div className='text-3xl mb-3'>🍪</div>
-                            <h3 className='text-lg font-semibold text-gray-900 dark:text-white mb-2'>
-                                Easy Management
-                            </h3>
-                            <p className='text-sm text-gray-600 dark:text-gray-400'>
-                                Manage all your cookies in one place with an intuitive interface
-                            </p>
-                        </div>
-
-                        <div className='p-6 rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-zinc-950 shadow-lg'>
-                            <div className='text-3xl mb-3'>🔄</div>
-                            <h3 className='text-lg font-semibold text-gray-900 dark:text-white mb-2'>
-                                Import & Export
-                            </h3>
-                            <p className='text-sm text-gray-600 dark:text-gray-400'>
-                                Seamlessly transfer cookies between browsers and devices
-                            </p>
-                        </div>
-
-                        <div className='p-6 rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-zinc-950 shadow-lg'>
-                            <div className='text-3xl mb-3'>🔒</div>
-                            <h3 className='text-lg font-semibold text-gray-900 dark:text-white mb-2'>
-                                Secure Storage
-                            </h3>
-                            <p className='text-sm text-gray-600 dark:text-gray-400'>
-                                Keep your cookies safe and organized in the cloud
-                            </p>
-                        </div>
-                    </div>
+                <div className='mt-14 grid gap-4 md:grid-cols-3 md:gap-6'>
+                    {highlights.map((item) => {
+                        const Icon = item.icon
+                        return (
+                            <Card key={item.title} className='rounded-3xl'>
+                                <CardContent className='flex flex-col items-center p-7 text-center'>
+                                    <div className='mb-4 flex size-14 items-center justify-center rounded-2xl border border-black/10 bg-black text-white dark:border-white/20 dark:bg-white dark:text-black'>
+                                        <Icon className='size-6' />
+                                    </div>
+                                    <CardTitle>{item.title}</CardTitle>
+                                    <CardDescription className='mt-2 leading-relaxed'>{item.description}</CardDescription>
+                                </CardContent>
+                            </Card>
+                        )
+                    })}
                 </div>
             </div>
         </div>

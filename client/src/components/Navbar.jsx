@@ -1,22 +1,25 @@
+import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { Button } from './ui/button'
 
 const Navbar = () => {
     const { logout } = useAuth()
 
     return (
-        <nav className="fixed top-0 w-full z-50 bg-white dark:bg-zinc-950 border-b border-gray-200 dark:border-gray-800 shadow-lg">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-16">
-                    <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                        Cookie-Manager
-                    </h1>
+        <nav className="fixed top-0 z-50 w-full border-b border-black/10 bg-white/80 backdrop-blur-xl dark:border-white/15 dark:bg-zinc-950/75">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="flex h-16 items-center justify-between">
+                    <Link to="/" className="text-lg font-semibold tracking-tight text-black dark:text-white">
+                        Cookie Manager
+                    </Link>
 
-                    <button
+                    <Button
                         onClick={logout}
-                        className="px-4 py-2 text-sm font-medium text-white bg-zinc-950 rounded-lg hover:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 dark:bg-white dark:text-black dark:hover:bg-gray-100 dark:focus:ring-white transition-colors"
+                        variant="outline"
+                        className="rounded-full"
                     >
                         Logout
-                    </button>
+                    </Button>
                 </div>
             </div>
         </nav>
