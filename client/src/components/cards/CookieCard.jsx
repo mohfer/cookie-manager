@@ -26,9 +26,23 @@ const CookieCard = ({ cookie, onUpdate, onDelete }) => {
                 ? rawValue
                 : JSON.stringify(rawValue ?? '', null, 2)
 
-            await navigator.clipboard.writeText(textValue)
+            // navigator.clipboard requires HTTPS, use fallback for HTTP
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(textValue)
+            } else {
+                // Fallback: textarea + execCommand for HTTP contexts
+                const textarea = document.createElement('textarea')
+                textarea.value = textValue
+                textarea.style.position = 'fixed'
+                textarea.style.opacity = '0'
+                document.body.appendChild(textarea)
+                textarea.select()
+                document.execCommand('copy')
+                document.body.removeChild(textarea)
+            }
             toast.success('Cookie value copied')
-        } catch {
+        } catch (e) {
+            console.error('Copy failed:', e)
             toast.error('Failed to copy cookie value')
         }
     }

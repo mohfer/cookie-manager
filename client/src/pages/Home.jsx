@@ -1,23 +1,23 @@
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight, Cookie, Repeat2, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Cookie, Download, Globe, ShieldCheck } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardTitle } from '../components/ui/card'
 
 const highlights = [
     {
-        title: 'Easy Management',
-        description: 'Manage all your cookies in one clean and fast dashboard.',
-        icon: Cookie,
+        title: 'Browser Extension',
+        description: 'Save and load cookies directly from Chrome. Works in normal and incognito mode.',
+        icon: Globe,
     },
     {
-        title: 'Import & Export',
-        description: 'Transfer cookies across browsers with a simpler workflow.',
-        icon: Repeat2,
-    },
-    {
-        title: 'Secure Storage',
-        description: 'Store cookie data in a structured format for safer access and quicker lookup.',
+        title: 'Encrypted Storage',
+        description: 'Cookie values are encrypted at rest using AES-256. Your data stays secure.',
         icon: ShieldCheck,
+    },
+    {
+        title: 'One-Click Import',
+        description: 'Inject saved cookies into any site with a single click. No manual copy-paste.',
+        icon: Cookie,
     },
 ]
 
@@ -26,6 +26,13 @@ const Home = () => {
 
     const handleLogin = () => {
         navigate('/login')
+    }
+
+    const handleDownload = () => {
+        const link = document.createElement('a')
+        link.href = '/downloads/cookie-manager-extension.zip'
+        link.download = 'cookie-manager-extension.zip'
+        link.click()
     }
 
     return (
@@ -44,12 +51,13 @@ const Home = () => {
 
                     <div className='mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row'>
                         <Button
-                            disabled
+                            onClick={handleDownload}
                             variant='outline'
                             size='lg'
-                            className='w-full cursor-not-allowed rounded-full opacity-70 sm:w-auto'
+                            className='w-full rounded-full sm:w-auto'
                         >
-                            Download Extension (Soon)
+                            <Download className='size-4' />
+                            Download Extension
                         </Button>
                         <Button
                             onClick={handleLogin}
