@@ -336,9 +336,10 @@ async function loadCookies() {
 
       return `
         <div class="cookie-item" data-id="${cookie.id}" data-domain="${cookie.domain}">
-          <img class="cookie-favicon" src="${faviconUrl}" alt="${cookie.name}" 
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-          <div class="cookie-favicon-fallback" style="display:none">${initial}</div>
+          <div class="cookie-favicon-wrapper">
+            <img class="cookie-favicon" src="${faviconUrl}" alt="${escapeHtml(cookie.name)} icon" loading="lazy">
+            <div class="cookie-favicon-fallback">${escapeHtml(initial)}</div>
+          </div>
           <div class="cookie-info">
             <div class="cookie-name">${escapeHtml(cookie.name)}</div>
             <div class="cookie-domain">${escapeHtml(cookie.domain)}</div>
@@ -357,6 +358,19 @@ async function loadCookies() {
 
     listEl.querySelectorAll('[data-action="delete"]').forEach(btn => {
       btn.addEventListener('click', () => handleDeleteCookie(parseInt(btn.dataset.id)));
+    });
+
+    // Inline event handlers are blocked by extension CSP, so favicon fallback is handled here.
+    listEl.querySelectorAll('.cookie-favicon-wrapper').forEach(wrapper => {
+      const img = wrapper.querySelector('.cookie-favicon');
+      if (!img) return;
+
+      const showFallback = () => wrapper.classList.add('show-fallback');
+
+      img.addEventListener('error', showFallback, { once: true });
+      if (img.complete && img.naturalWidth === 0) {
+        showFallback();
+      }
     });
 
   } catch (e) {
