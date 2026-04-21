@@ -4,11 +4,12 @@ import LoadingSpinner from '../ui/LoadingSpinner'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
+import { Link } from 'react-router-dom'
 
 const LoginForm = () => {
     const { login, loading } = useAuth()
     const [showPassword, setShowPassword] = useState(false)
-    const [form, setForm] = useState({ username: '', password: '' })
+    const [form, setForm] = useState({ login: '', password: '' })
     const [error, setError] = useState(null)
 
     const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
@@ -16,7 +17,7 @@ const LoginForm = () => {
     const onSubmit = async (e) => {
         e.preventDefault()
 
-        if (!form.username.trim() || !form.password.trim()) {
+        if (!form.login.trim() || !form.password.trim()) {
             setError('All fields are required')
             return
         }
@@ -24,7 +25,7 @@ const LoginForm = () => {
         setError(null)
 
         try {
-            await login(form.username, form.password)
+            await login(form.login, form.password)
         } catch (err) {
             setError(err.message || 'Login failed')
         }
@@ -33,23 +34,24 @@ const LoginForm = () => {
     return (
         <form onSubmit={onSubmit} className="space-y-5">
             <div className="space-y-2">
-                <Label htmlFor="username">
-                    Username
-                </Label>
+                <Label htmlFor="login">Email or Username</Label>
                 <Input
-                    id="username"
-                    name="username"
+                    id="login"
+                    name="login"
                     type="text"
-                    value={form.username}
+                    value={form.login}
                     onChange={onChange}
-                    placeholder="johndoe"
+                    placeholder="john@example.com"
                     className="h-11 rounded-2xl"
                 />
             </div>
             <div className="space-y-2">
-                <Label htmlFor="password">
-                    Password
-                </Label>
+                <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    <Link to="/forgot-password" className="text-xs text-zinc-500 hover:text-black dark:text-zinc-400 dark:hover:text-white">
+                        Forgot password?
+                    </Link>
+                </div>
                 <div className="relative">
                     <Input
                         id="password"
@@ -80,15 +82,15 @@ const LoginForm = () => {
                     </button>
                 </div>
             </div>
-            <Button
-                type="submit"
-                disabled={loading}
-                className="h-11 w-full rounded-2xl"
-            >
+            <Button type="submit" disabled={loading} className="h-11 w-full rounded-2xl">
                 {loading && <LoadingSpinner size="sm" />}
                 {loading ? 'Logging in...' : 'Login'}
             </Button>
             {error && <p className="text-sm text-zinc-700 dark:text-zinc-300">{error}</p>}
+            <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
+                Don't have an account?{' '}
+                <Link to="/register" className="font-medium text-black hover:underline dark:text-white">Register</Link>
+            </p>
         </form>
     )
 }

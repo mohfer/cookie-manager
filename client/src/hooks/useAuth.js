@@ -1,20 +1,34 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { loginApi, logoutApi } from '../api/auth'
-
-const TOKEN_KEY = 'authToken'
+import { loginApi, logoutApi, getUserApi } from '../api/auth'
 
 export const useAuth = () => {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
+    const [user, setUser] = useState(null)
 
-    const isAuthenticated = !!localStorage.getItem(TOKEN_KEY)
+    const isAuthenticated = !!localStorage.getItem('authToken')
 
-    const login = useCallback(async (username, password) => {
+    const fetchUser = useCallback(async () => {
+        if (!isAuthenticated) return
+        try {
+            const data = await getUserApi()
+            setUser(data)
+        } catch {
+            // Token invalid
+        }
+    }, [isAuthenticated])
+
+    useEffect(() => {
+        fetchUser()
+    }, [fetchUser])
+
+    const login = useCallback(async (login, password) => {
         setLoading(true)
         try {
-            const data = await loginApi(username, password)
-            localStorage.setItem(TOKEN_KEY, data.token)
+            const data = await loginApi(login, password)
+            localStorage.setItem('authToken', data.token)
+            setUser(data.user)
             navigate('/dashboard')
             return data
         } finally {
@@ -28,10 +42,11 @@ export const useAuth = () => {
         } catch {
             // Logout API may fail if token is already invalid
         } finally {
-            localStorage.removeItem(TOKEN_KEY)
+            localStorage.removeItem('authToken')
+            setUser(null)
             navigate('/login')
         }
     }, [navigate])
 
-    return { isAuthenticated, loading, login, logout }
+    return { isAuthenticated, loading, user, fetchUser, login, logout }
 }
