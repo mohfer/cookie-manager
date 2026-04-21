@@ -1,29 +1,36 @@
 <?php
 
-return [
+$allowedOrigins = array_values(array_filter(array_map(
+    'trim',
+    explode(',', (string) env('CORS_ALLOWED_ORIGINS', (string) env('FRONTEND_URL', 'http://localhost:5173'))),
+)));
 
-    /*
-    |--------------------------------------------------------------------------
-    | Cross-Origin Resource Sharing (CORS) Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Here you may configure your settings for cross-origin resource sharing
-    | or "CORS". This determines what cross-origin operations may execute
-    | in web browsers. You are free to adjust these settings as needed.
-    |
-    | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
-    |
-    */
+$allowedMethods = array_values(array_filter(array_map(
+    'trim',
+    explode(',', (string) env('CORS_ALLOWED_METHODS', 'GET,POST,PUT,PATCH,DELETE,OPTIONS')),
+)));
+
+$allowedHeaders = array_values(array_filter(array_map(
+    'trim',
+    explode(',', (string) env('CORS_ALLOWED_HEADERS', 'Content-Type,Accept,Authorization')),
+)));
+
+$allowedOriginPatterns = array_values(array_filter(array_map(
+    'trim',
+    explode(',', (string) env('CORS_ALLOWED_ORIGIN_PATTERNS', '')),
+)));
+
+return [
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-    'allowed_methods' => ['*'],
+    'allowed_methods' => $allowedMethods,
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => $allowedOrigins,
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => $allowedOriginPatterns,
 
-    'allowed_headers' => ['*'],
+    'allowed_headers' => $allowedHeaders,
 
     'exposed_headers' => [],
 

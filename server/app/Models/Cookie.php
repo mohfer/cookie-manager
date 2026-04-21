@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Crypt;
 
 final class Cookie extends Model
 {
     protected $fillable = [
+        'user_id',
         'domain',
         'name',
         'value',
@@ -20,6 +22,11 @@ final class Cookie extends Model
      * We handle encryption/decryption via accessors/mutators.
      */
     protected $casts = [];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     /**
      * Decrypt value when getting - returns the decoded array.

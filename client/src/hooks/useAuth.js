@@ -7,7 +7,7 @@ export const useAuth = () => {
     const [loading, setLoading] = useState(false)
     const [user, setUser] = useState(null)
 
-    const isAuthenticated = !!localStorage.getItem('authToken')
+    const isAuthenticated = !!sessionStorage.getItem('authToken')
 
     const fetchUser = useCallback(async () => {
         if (!isAuthenticated) return
@@ -27,7 +27,7 @@ export const useAuth = () => {
         setLoading(true)
         try {
             const data = await loginApi(login, password)
-            localStorage.setItem('authToken', data.token)
+            sessionStorage.setItem('authToken', data.token)
             setUser(data.user)
             navigate('/dashboard')
             return data
@@ -42,7 +42,7 @@ export const useAuth = () => {
         } catch {
             // Logout API may fail if token is already invalid
         } finally {
-            localStorage.removeItem('authToken')
+            sessionStorage.removeItem('authToken')
             setUser(null)
             navigate('/login')
         }

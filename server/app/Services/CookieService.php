@@ -5,23 +5,24 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Cookie;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
 final class CookieService
 {
-    public function getAll(): Collection
+    public function getAllForUser(User $user): Collection
     {
-        return Cookie::orderBy('name', 'asc')->get();
+        return $user->cookies()->orderBy('name', 'asc')->get();
     }
 
-    public function findById(int $id): ?Cookie
+    public function findByIdForUser(User $user, int $id): ?Cookie
     {
-        return Cookie::find($id);
+        return $user->cookies()->whereKey($id)->first();
     }
 
-    public function create(array $data): Cookie
+    public function createForUser(User $user, array $data): Cookie
     {
-        return Cookie::create($data);
+        return $user->cookies()->create($data);
     }
 
     public function update(Cookie $cookie, array $data): Cookie

@@ -18,6 +18,7 @@ final class ProfileController extends Controller
     {
         $user = $request->user();
         $data = $request->validated();
+        $currentTokenId = $user->currentAccessToken()?->id;
 
         if (isset($data['email'])) {
             $user->email = $data['email'];
@@ -30,6 +31,16 @@ final class ProfileController extends Controller
         }
 
         $user->save();
+
+        if (isset($data['password'])) {
+            $tokenQuery = $user->tokens();
+
+            if ($currentTokenId !== null) {
+                $tokenQuery->where('id', '!=', $currentTokenId);
+            }
+
+            $tokenQuery->delete();
+        }
 
         return $this->sendResponse($user->fresh(), 'Profile updated successfully');
     }

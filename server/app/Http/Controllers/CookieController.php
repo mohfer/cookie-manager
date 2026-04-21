@@ -6,9 +6,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCookieRequest;
 use App\Http\Requests\UpdateCookieRequest;
-use App\Models\Cookie;
 use App\Services\CookieService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 
 final class CookieController extends Controller
 {
@@ -16,33 +16,51 @@ final class CookieController extends Controller
 
     public function __construct(private readonly CookieService $cookieService) {}
 
-    public function index()
+    public function index(Request $request)
     {
-        return $this->sendResponse($this->cookieService->getAll(), 'Cookies retrieved successfully');
+        return $this->sendResponse($this->cookieService->getAllForUser($request->user()), 'Cookies retrieved successfully');
     }
 
     public function store(StoreCookieRequest $request)
     {
-        $cookie = $this->cookieService->create($request->validated());
+        $cookie = $this->cookieService->createForUser($request->user(), $request->validated());
 
         return $this->sendResponse($cookie, 'Cookie created successfully', 201);
     }
 
-    public function show(Cookie $cookie)
+    public function show(Request $request, int $cookie)
     {
-        return $this->sendResponse($cookie, 'Cookie retrieved successfully');
+        $ownedCookie = $this->cookieService->findByIdForUser($request->user(), $cookie);
+
+        if (!$ownedCookie) {
+            return $this->sendError('Cookie not found', 404);
+        }
+
+        return $this->sendResponse($ownedCookie, 'Cookie retrieved successfully');
     }
 
-    public function update(UpdateCookieRequest $request, Cookie $cookie)
+    public function update(UpdateCookieRequest $request, int $cookie)
     {
-        $cookie = $this->cookieService->update($cookie, $request->validated());
+        $ownedCookie = $this->cookieService->findByIdForUser($request->user(), $cookie);
 
-        return $this->sendResponse($cookie, 'Cookie updated successfully');
+        if (!$ownedCookie) {
+            return $this->sendError('Cookie not found', 404);
+        }
+
+        $updatedCookie = $this->cookieService->update($ownedCookie, $request->validated());
+
+        return $this->sendResponse($updatedCookie, 'Cookie updated successfully');
     }
 
-    public function destroy(Cookie $cookie)
+    public function destroy(Request $request, int $cookie)
     {
-        $this->cookieService->delete($cookie);
+        $ownedCookie = $this->cookieService->findByIdForUser($request->user(), $cookie);
+
+        if (!$ownedCookie) {
+            return $this->sendError('Cookie not found', 404);
+        }
+
+        $this->cookieService->delete($ownedCookie);
 
         return $this->sendResponse(null, 'Cookie deleted successfully');
     }

@@ -33,7 +33,7 @@ const RegisterForm = () => {
 
         try {
             const data = await registerApi(form)
-            localStorage.setItem('authToken', data.token)
+            sessionStorage.setItem('authToken', data.token)
             navigate('/dashboard')
         } catch (err) {
             setError(err.message || 'Registration failed')

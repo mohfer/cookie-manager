@@ -10,10 +10,32 @@
  */
 
 // ============ STATE ============
+const DEFAULT_API_URL = 'http://localhost:8000';
+
 let API_URL = '';
 let AUTH_TOKEN = '';
 let CURRENT_TAB = null;
 let CURRENT_DOMAIN = '';
+
+function normalizeApiUrl(rawUrl) {
+  return (rawUrl || '').trim().replace(/\/+$/, '');
+}
+
+function isLocalApiHost(hostname) {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]';
+}
+
+function isAllowedApiUrl(rawUrl) {
+  try {
+    const url = new URL(rawUrl);
+
+    if (url.protocol === 'https:') return true;
+
+    return url.protocol === 'http:' && isLocalApiHost(url.hostname);
+  } catch {
+    return false;
+  }
+}
 
 // ============ INIT ============
 document.addEventListener('DOMContentLoaded', async () => {
@@ -32,16 +54,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ============ SETTINGS ============
 async function loadSettings() {
-  const data = await chrome.storage.local.get(['apiUrl', 'authToken']);
-  API_URL = data.apiUrl || 'http://localhost:8000';
-  AUTH_TOKEN = data.authToken || '';
+  const localData = await chrome.storage.local.get(['apiUrl', 'authToken']);
+  const sessionData = await chrome.storage.session.get(['authToken']);
+
+  const candidateApiUrl = normalizeApiUrl(localData.apiUrl || DEFAULT_API_URL);
+  API_URL = isAllowedApiUrl(candidateApiUrl) ? candidateApiUrl : DEFAULT_API_URL;
+  AUTH_TOKEN = sessionData.authToken || '';
+
+  if (!AUTH_TOKEN && localData.authToken) {
+    AUTH_TOKEN = localData.authToken;
+    await chrome.storage.session.set({ authToken: AUTH_TOKEN });
+    await chrome.storage.local.remove('authToken');
+  }
 
   const apiInput = document.getElementById('api-url');
   if (apiInput) apiInput.value = API_URL;
 }
 
-async function saveSettings() {
-  await chrome.storage.local.set({ apiUrl: API_URL, authToken: AUTH_TOKEN });
+async function saveApiUrl() {
+  await chrome.storage.local.set({ apiUrl: API_URL });
+}
+
+async function saveAuthToken() {
+  if (AUTH_TOKEN) {
+    await chrome.storage.session.set({ authToken: AUTH_TOKEN });
+  } else {
+    await chrome.storage.session.remove('authToken');
+  }
+
+  await chrome.storage.local.remove('authToken');
 }
 
 // ============ TAB ============
@@ -72,6 +113,14 @@ function showScreen(name) {
 
 // ============ API HELPER ============
 async function apiCall(path, options = {}) {
+  const safeApiUrl = normalizeApiUrl(API_URL);
+
+  if (!isAllowedApiUrl(safeApiUrl)) {
+    throw new Error('Invalid API URL. Use HTTPS, or HTTP only for localhost.');
+  }
+
+  API_URL = safeApiUrl;
+
   const headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -83,7 +132,7 @@ async function apiCall(path, options = {}) {
 
   if (res.status === 401) {
     AUTH_TOKEN = '';
-    await saveSettings();
+    await saveAuthToken();
     showScreen('login');
     throw new Error('Session expired, please login again');
   }
@@ -103,7 +152,14 @@ async function handleLogin() {
   const errorEl = document.getElementById('login-error');
   const btn = document.getElementById('btn-login');
 
-  API_URL = document.getElementById('api-url').value.trim().replace(/\/+$/, '');
+  const candidateApiUrl = normalizeApiUrl(document.getElementById('api-url').value);
+
+  if (!isAllowedApiUrl(candidateApiUrl)) {
+    errorEl.textContent = 'API URL must use HTTPS (HTTP only allowed for localhost).';
+    return;
+  }
+
+  API_URL = candidateApiUrl;
 
   if (!username || !password) {
     errorEl.textContent = 'Username and password are required';
@@ -133,7 +189,8 @@ async function handleLogin() {
     AUTH_TOKEN = data.data?.token || data.data?.access_token || '';
     if (!AUTH_TOKEN) throw new Error('No token received from server');
 
-    await saveSettings();
+    await saveApiUrl();
+    await saveAuthToken();
     showScreen('main');
     loadCookies();
   } catch (e) {
@@ -151,7 +208,7 @@ async function handleLogout() {
     // ignore
   }
   AUTH_TOKEN = '';
-  await saveSettings();
+  await saveAuthToken();
   showScreen('login');
 }
 

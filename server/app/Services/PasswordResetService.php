@@ -55,6 +55,7 @@ final class PasswordResetService
         }
 
         $user->update(['password' => Hash::make($password)]);
+        $user->tokens()->delete();
         DB::table('password_reset_tokens')->where('email', $email)->delete();
 
         return true;

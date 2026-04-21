@@ -1,7 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL
 
 export const apiFetch = async (path, options = {}) => {
-    const token = localStorage.getItem('authToken')
+    const token = sessionStorage.getItem('authToken')
 
     const headers = {
         'Content-Type': 'application/json',
@@ -14,7 +14,7 @@ export const apiFetch = async (path, options = {}) => {
 
     if (!res.ok) {
         if (res.status === 401) {
-            localStorage.removeItem('authToken')
+            sessionStorage.removeItem('authToken')
             throw new Error('Authentication required')
         }
         const errData = await res.json().catch(() => ({}))
