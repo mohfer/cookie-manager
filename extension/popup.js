@@ -118,7 +118,10 @@ async function handleLogin() {
     const data = await fetch(`${API_URL}/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({
+        login: username,
+        password: password
+      }),
     }).then(async (res) => {
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
