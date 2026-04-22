@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Cookie Manager",
+  "name": "CookieVault",
   "version": "1.0.0",
-  "description": "Save and load cookies to/from Cookie Manager backend",
+  "description": "Save and load cookies to/from CookieVault backend",
   "permissions": [
     "cookies",
     "activeTab",

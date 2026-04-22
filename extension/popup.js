@@ -1,18 +1,30 @@
 /**
- * Cookie Manager Extension - popup.js
- * 
+ * CookieVault Extension - popup.js
+ *
  * Features:
  * - Login to backend API (Sanctum token auth)
- * - Save current site's cookies to Cookie Manager backend
+ * - Save current site's cookies to CookieVault backend
  * - List saved cookies from backend
  * - Load/inject saved cookies into the current tab
  * - Delete saved cookie entries
+ * - Open CookieVault dashboard in a new tab
  */
 
-// ============ STATE ============
-const DEFAULT_API_URL = 'http://localhost:8000';
+// ============ CONFIG DEFAULTS (set via build placeholders) ============
+const BUILD_API_URL = '__API_URL__';
+const BUILD_FRONTEND_URL = '__FRONTEND_URL__';
 
-let API_URL = '';
+function resolveBuiltUrl(value, fallback) {
+  if (!value || value.startsWith('__')) return fallback;
+  return value;
+}
+
+const DEFAULT_API_URL = resolveBuiltUrl(BUILD_API_URL, 'http://localhost:8000');
+const DEFAULT_FRONTEND_URL = resolveBuiltUrl(BUILD_FRONTEND_URL, 'http://localhost:5173');
+
+// ============ STATE ============
+const API_URL = DEFAULT_API_URL.replace(/\/+$/, '');
+const FRONTEND_URL = DEFAULT_FRONTEND_URL.replace(/\/+$/, '');
 let AUTH_TOKEN = '';
 let CURRENT_TAB = null;
 let CURRENT_DOMAIN = '';
@@ -49,16 +61,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     showScreen('login');
   }
 
+  updateHeaderButtons();
   bindEvents();
 });
 
 // ============ SETTINGS ============
 async function loadSettings() {
-  const localData = await chrome.storage.local.get(['apiUrl', 'authToken']);
+  const localData = await chrome.storage.local.get(['authToken']);
   const sessionData = await chrome.storage.session.get(['authToken']);
 
-  const candidateApiUrl = normalizeApiUrl(localData.apiUrl || DEFAULT_API_URL);
-  API_URL = isAllowedApiUrl(candidateApiUrl) ? candidateApiUrl : DEFAULT_API_URL;
   AUTH_TOKEN = sessionData.authToken || '';
 
   if (!AUTH_TOKEN && localData.authToken) {
@@ -66,13 +77,6 @@ async function loadSettings() {
     await chrome.storage.session.set({ authToken: AUTH_TOKEN });
     await chrome.storage.local.remove('authToken');
   }
-
-  const apiInput = document.getElementById('api-url');
-  if (apiInput) apiInput.value = API_URL;
-}
-
-async function saveApiUrl() {
-  await chrome.storage.local.set({ apiUrl: API_URL });
 }
 
 async function saveAuthToken() {
@@ -106,9 +110,17 @@ async function getCurrentTab() {
 }
 
 // ============ SCREENS ============
+function updateHeaderButtons() {
+  const dashboardBtn = document.getElementById('btn-open-dashboard');
+  if (dashboardBtn) {
+    dashboardBtn.style.display = AUTH_TOKEN ? 'flex' : 'none';
+  }
+}
+
 function showScreen(name) {
   document.getElementById('login-screen').classList.toggle('hidden', name !== 'login');
   document.getElementById('main-screen').classList.toggle('hidden', name !== 'main');
+  updateHeaderButtons();
 }
 
 // ============ API HELPER ============
@@ -119,8 +131,6 @@ async function apiCall(path, options = {}) {
     throw new Error('Invalid API URL. Use HTTPS, or HTTP only for localhost.');
   }
 
-  API_URL = safeApiUrl;
-
   const headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -128,7 +138,7 @@ async function apiCall(path, options = {}) {
     ...options.headers,
   };
 
-  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  const res = await fetch(`${safeApiUrl}${path}`, { ...options, headers });
 
   if (res.status === 401) {
     AUTH_TOKEN = '';
@@ -145,6 +155,17 @@ async function apiCall(path, options = {}) {
   return res.json();
 }
 
+// ============ ACTIONS ============
+async function handleOpenDashboard() {
+  const frontendBase = FRONTEND_URL;
+  if (!frontendBase) {
+    alert('Frontend URL is not configured in build settings.');
+    return;
+  }
+
+  chrome.tabs.create({ url: `${frontendBase}/dashboard` });
+}
+
 // ============ AUTH ============
 async function handleLogin() {
   const username = document.getElementById('login-username').value.trim();
@@ -152,14 +173,11 @@ async function handleLogin() {
   const errorEl = document.getElementById('login-error');
   const btn = document.getElementById('btn-login');
 
-  const candidateApiUrl = normalizeApiUrl(document.getElementById('api-url').value);
-
-  if (!isAllowedApiUrl(candidateApiUrl)) {
-    errorEl.textContent = 'API URL must use HTTPS (HTTP only allowed for localhost).';
+  const safeApiUrl = normalizeApiUrl(API_URL);
+  if (!isAllowedApiUrl(safeApiUrl)) {
+    errorEl.textContent = 'Invalid API URL configured in extension build settings.';
     return;
   }
-
-  API_URL = candidateApiUrl;
 
   if (!username || !password) {
     errorEl.textContent = 'Username and password are required';
@@ -171,7 +189,7 @@ async function handleLogin() {
   errorEl.textContent = '';
 
   try {
-    const data = await fetch(`${API_URL}/api/login`, {
+    const data = await fetch(`${safeApiUrl}/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({
@@ -189,7 +207,6 @@ async function handleLogin() {
     AUTH_TOKEN = data.data?.token || data.data?.access_token || '';
     if (!AUTH_TOKEN) throw new Error('No token received from server');
 
-    await saveApiUrl();
     await saveAuthToken();
     showScreen('main');
     loadCookies();
@@ -289,7 +306,7 @@ async function handleSaveCookies() {
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
       </svg>
-      Save Cookies to Manager
+      Save Cookies to Vault
     `;
   }
 }
@@ -458,6 +475,7 @@ function escapeHtml(str) {
 // ============ EVENT BINDINGS ============
 function bindEvents() {
   document.getElementById('btn-login').addEventListener('click', handleLogin);
+  document.getElementById('btn-open-dashboard').addEventListener('click', handleOpenDashboard);
   document.getElementById('btn-logout').addEventListener('click', handleLogout);
   document.getElementById('btn-save-cookies').addEventListener('click', handleSaveCookies);
   document.getElementById('btn-refresh').addEventListener('click', loadCookies);

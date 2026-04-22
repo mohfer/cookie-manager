@@ -2,7 +2,7 @@
     <img src="https://i.imgur.com/7aEIgNY.png" alt="Cookie Manager Preview" width="600">
 </p>
 
-# Cookie Manager
+# CookieVault
 
 A full-stack cookie management application with a **Laravel 12 API** backend, a **React 19 SPA** frontend, and a **Chrome Extension** for seamless cookie import/export.
 
@@ -65,10 +65,35 @@ bun run dev
 
 ### Extension
 
+Configure extension endpoints in `extension/.env`:
+
+```env
+API_URL=http://localhost:8000
+FRONTEND_URL=http://localhost:5173
+```
+
+Build extension zip:
+
+```bash
+./scripts/build-extension.sh
+```
+
+Or from client folder:
+
+```bash
+cd client
+pnpm run build:extension
+```
+
+Output zip: `client/public/downloads/cookie-vault-extension.zip`
+
+For development, load the unpacked extension directly from `extension/`:
 1. Open `chrome://extensions`
 2. Enable **Developer mode**
 3. Click **Load unpacked** → select the `extension/` folder
 4. Enable **Allow in incognito** if needed
+
+The popup also includes an **Open Dashboard** button that opens the frontend dashboard URL configured at build time.
 
 ## API Endpoints
 
@@ -90,7 +115,7 @@ bun run dev
 ## Project Structure
 
 ```
-cookie-manager/
+cookie-vault/
 ├── server/                         # Laravel 12 API
 │   ├── app/Http/Controllers/       # AuthController, CookieController, ProfileController
 │   ├── app/Services/               # AuthService, CookieService, PasswordResetService

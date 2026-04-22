@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Cookie manager — a monorepo with a **Laravel 12 API** (`server/`), a **React 19 SPA** (`client/`), and a **Chrome Extension** (`extension/`).
+CookieVault — a monorepo with a **Laravel 12 API** (`server/`), a **React 19 SPA** (`client/`), and a **Chrome Extension** (`extension/`).
 
 ## Commands
 
@@ -33,7 +33,13 @@ bun run lint               # ESLint
 ### Extension
 
 ```bash
-# No build step — load directly in Chrome
+cd client
+pnpm run build:extension   # Build extension zip (reads extension/.env)
+
+# Alternative from repo root
+./scripts/build-extension.sh
+
+# For development
 # chrome://extensions → Developer mode → Load unpacked → extension/
 ```
 

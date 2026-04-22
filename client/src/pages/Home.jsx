@@ -30,8 +30,8 @@ const Home = () => {
 
     const handleDownload = () => {
         const link = document.createElement('a')
-        link.href = '/downloads/cookie-manager-extension.zip'
-        link.download = 'cookie-manager-extension.zip'
+        link.href = '/downloads/cookie-vault-extension.zip'
+        link.download = 'cookie-vault-extension.zip'
         link.click()
     }
 
@@ -40,10 +40,10 @@ const Home = () => {
             <div className='mx-auto w-full max-w-6xl'>
                 <div className='mx-auto max-w-3xl text-center'>
                     <p className='inline-flex rounded-full border border-black/10 bg-white/70 px-4 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-zinc-600 dark:border-white/20 dark:bg-zinc-950/70 dark:text-zinc-400'>
-                        Cookie Workspace
+                        CookieVault Workspace
                     </p>
                     <h1 className='mt-6 text-4xl font-extrabold tracking-tight text-black sm:text-6xl dark:text-white'>
-                        Cookie Manager
+                        CookieVault
                     </h1>
                     <p className='mx-auto mt-5 max-w-2xl text-base text-zinc-600 sm:text-lg dark:text-zinc-400'>
                         Monochrome, fast, and focused. Manage browser cookies without distractions using a clean modern interface.

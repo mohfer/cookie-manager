@@ -16,7 +16,7 @@
                             <table role="presentation" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td style="background:#fafafa;border-radius:12px;padding:10px 16px;">
-                                        <span style="font-size:18px;font-weight:700;color:#09090b;letter-spacing:-0.02em;">Cookie Manager</span>
+                                        <span style="font-size:18px;font-weight:700;color:#09090b;letter-spacing:-0.02em;">CookieVault</span>
                                     </td>
                                 </tr>
                             </table>
@@ -86,7 +86,7 @@
                     <tr>
                         <td align="center">
                             <p style="margin:0;font-size:11px;color:#27272a;">
-                                Cookie Manager &mdash; Monochrome, fast, and focused.
+                                CookieVault &mdash; Monochrome, fast, and focused.
                             </p>
                         </td>
                     </tr>

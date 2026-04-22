@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cookie Manager</title>
+  <title>CookieVault</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 
@@ -13,12 +13,8 @@
   <!-- Login Screen -->
   <div id="login-screen" class="screen">
     <div class="header">
-      <img src="icons/icon48.png" alt="Cookie Manager" class="logo">
-      <h1>Cookie Manager</h1>
-    </div>
-    <div class="form-group">
-      <label for="api-url">API URL</label>
-      <input type="text" id="api-url" placeholder="http://localhost:8000" value="">
+      <img src="icons/icon48.png" alt="CookieVault" class="logo">
+      <h1>CookieVault</h1>
     </div>
     <div class="form-group">
       <label for="login-username">Username</label>
@@ -51,20 +47,30 @@
   <div id="main-screen" class="screen hidden">
     <div class="header">
       <div class="header-left">
-        <img src="icons/icon48.png" alt="Cookie Manager" class="logo">
+        <img src="icons/icon48.png" alt="CookieVault" class="logo">
         <div>
-          <h1>Cookie Manager</h1>
+          <h1>CookieVault</h1>
           <span id="current-site" class="site-label">loading...</span>
         </div>
       </div>
-      <button id="btn-logout" class="btn-icon" title="Logout">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-          <polyline points="16 17 21 12 16 7" />
-          <line x1="21" y1="12" x2="9" y2="12" />
-        </svg>
-      </button>
+      <div class="header-actions">
+        <button id="btn-open-dashboard" class="btn-icon" title="Open Dashboard">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6" />
+            <polyline points="15 3 21 3 21 9" />
+            <line x1="10" y1="14" x2="21" y2="3" />
+          </svg>
+        </button>
+        <button id="btn-logout" class="btn-icon" title="Logout">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+        </button>
+      </div>
     </div>
 
     <!-- Save Section -->
@@ -83,7 +89,7 @@
             <polyline points="17 21 17 13 7 13 7 21" />
             <polyline points="7 3 7 8 15 8" />
           </svg>
-          Save Cookies to Manager
+          Save Cookies to Vault
         </button>
         <div id="save-status" class="status-msg"></div>
       </div>
