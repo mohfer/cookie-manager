@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://i.imgur.com/7aEIgNY.png" alt="Cookie Manager Preview" width="600">
+    <img src="https://i.imgur.com/mBdxfQe.png" alt="CookieVault Preview" width="600">
 </p>
 
 # CookieVault
