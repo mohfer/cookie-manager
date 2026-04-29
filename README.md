@@ -4,40 +4,21 @@
 
 # CookieVault
 
-A full-stack cookie management application with a **Laravel 12 API** backend, a **React 19 SPA** frontend, and a **Chrome Extension** for seamless cookie import/export.
+CookieVault is a full-stack cookie management app with a Laravel API, React SPA, and Chrome Extension for saving, searching, and loading browser cookies.
 
 ## Tech Stack
 
-### Backend (`server/`)
-
-- **Laravel 12** with Octane (FrankenPHP)
-- **Laravel Sanctum** for token-based API authentication
-- **MySQL** database with AES-256 encrypted cookie values
-- Queued emails via `ShouldQueue` for password reset
-- Service pattern architecture with Form Requests for validation
-- PHP 8.4 with strict types, readonly properties, and constructor promotion
-
-### Frontend (`client/`)
-
-- **React 19** with React Router v7
-- **Tailwind CSS v4** — monochrome dark theme
-- **Vite 7** (Bun)
-- Custom hooks pattern (`useAuth`, `useCookies`) with shared API client
-
-### Chrome Extension (`extension/`)
-
-- **Manifest V3** — works in normal and incognito mode
-- Save cookies from any site directly to the backend
-- Load/inject saved cookies with one click
-- Auto-filter by current domain, search across all saved cookies
-- Monochrome dark UI matching the web app
+- **Server:** Laravel 12, Sanctum token auth, MySQL, queued password reset emails, Pest/PHPUnit tests.
+- **Client:** React 19, React Router 7, Vite 7, Tailwind CSS 4, Vitest + Testing Library.
+- **Extension:** Chrome Manifest V3 popup/service worker with packaged ZIP builds.
 
 ## Features
 
-- **Encrypted Storage** — Cookie values are encrypted at rest using Laravel's `Crypt` facade (AES-256-CBC)
-- **Browser Extension** — Save and load cookies. Supports incognito mode via `getAllCookieStores()`
-- **One-Click Import** — Inject saved cookies into any site and auto-reload the page
-- **Search & Filter** — On-site tabs show domain-specific cookies. Blank tabs show all cookies with search
+- Encrypted cookie values at rest through Laravel `Crypt`.
+- Token-based registration, login, logout, profile update, and password reset.
+- Per-user cookie CRUD with domain/name validation and ownership checks.
+- Extension support for saving current-site cookies and injecting saved cookies back into tabs.
+- Downloadable extension ZIP generated into `client/public/downloads/`.
 
 ## Getting Started
 
@@ -45,13 +26,16 @@ A full-stack cookie management application with a **Laravel 12 API** backend, a 
 
 ```bash
 cd server
-cp .env.example .env
 composer install
+cp .env.example .env
 php artisan key:generate
 php artisan migrate
 php artisan serve
+```
 
-# For password reset emails
+Run the queue worker when testing password reset emails locally:
+
+```bash
 php artisan queue:work
 ```
 
@@ -59,80 +43,104 @@ php artisan queue:work
 
 ```bash
 cd client
-bun install
-bun run dev
+npm install
+npm run dev
 ```
 
 ### Extension
 
-Configure extension endpoints in `extension/.env`:
+Create `extension/.env` from your local endpoints:
 
 ```env
 API_URL=http://localhost:8000
 FRONTEND_URL=http://localhost:5173
 ```
 
-Build extension zip:
+Build the downloadable extension ZIP:
 
 ```bash
-./scripts/build-extension.sh
+# Linux/macOS
+cd client && npm run build:extension
+
+# Windows PowerShell
+cd client; npm run build:extension:win
 ```
 
-Or from client folder:
+Output: `client/public/downloads/cookie-vault-extension.zip`. This folder is ignored by git.
+
+For development, open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select `extension/`. Enable **Allow in incognito** if needed.
+
+## Testing
+
+### Client Tests
 
 ```bash
 cd client
-pnpm run build:extension
+npm test
 ```
 
-Output zip: `client/public/downloads/cookie-vault-extension.zip`
+Client tests cover API wrappers, auth route guards, and key form behavior using Vitest and Testing Library.
 
-For development, load the unpacked extension directly from `extension/`:
-1. Open `chrome://extensions`
-2. Enable **Developer mode**
-3. Click **Load unpacked** → select the `extension/` folder
-4. Enable **Allow in incognito** if needed
+### Server Tests
 
-The popup also includes an **Open Dashboard** button that opens the frontend dashboard URL configured at build time.
+Server tests use MySQL, not SQLite. Create a dedicated test database first:
+
+```sql
+CREATE DATABASE cookievault_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+Copy the local testing env template and fill in your own MySQL credentials. Do not commit `.env.testing`.
+
+```bash
+cd server
+cp .env.testing.example .env.testing
+php artisan key:generate --env=testing
+composer test
+```
+
+Server tests cover auth flows, cookie CRUD, ownership isolation, validation, profile updates, token revocation, and encrypted cookie model behavior.
 
 ## API Endpoints
 
-| Method | Endpoint                 | Auth | Description              |
-| ------ | ------------------------ | ---- | ------------------------ |
-| POST   | `/api/register`          | No   | Register (email+password)|
-| POST   | `/api/login`             | No   | Login (email or username)|
-| POST   | `/api/logout`            | Yes  | Logout                   |
-| GET    | `/api/user`              | Yes  | Get authenticated user   |
-| PUT    | `/api/profile`           | Yes  | Update email/password    |
-| POST   | `/api/forgot-password`   | No   | Send reset link          |
-| POST   | `/api/reset-password`    | No   | Reset password with token|
-| GET    | `/api/cookies`           | Yes  | List all cookies         |
-| POST   | `/api/cookies`           | Yes  | Create a cookie          |
-| GET    | `/api/cookies/{cookie}`  | Yes  | Get a cookie             |
-| PUT    | `/api/cookies/{cookie}`  | Yes  | Update a cookie          |
-| DELETE | `/api/cookies/{cookie}`  | Yes  | Delete a cookie          |
+| Method | Endpoint | Auth | Description |
+| --- | --- | --- | --- |
+| POST | `/api/register` | No | Register with email and password |
+| POST | `/api/login` | No | Login with email or username |
+| POST | `/api/logout` | Yes | Revoke current token |
+| GET | `/api/user` | Yes | Get authenticated user |
+| PUT | `/api/profile` | Yes | Update email or password |
+| POST | `/api/forgot-password` | No | Queue reset email |
+| POST | `/api/reset-password` | No | Reset password with token |
+| GET | `/api/cookies` | Yes | List owned cookies |
+| POST | `/api/cookies` | Yes | Create cookie entry |
+| GET | `/api/cookies/{cookie}` | Yes | Show owned cookie |
+| PUT | `/api/cookies/{cookie}` | Yes | Update owned cookie |
+| DELETE | `/api/cookies/{cookie}` | Yes | Delete owned cookie |
 
 ## Project Structure
 
+```text
+CookieVault/
++-- client/                 # React SPA
+|   +-- src/api/            # API wrappers and tests
+|   +-- src/components/     # UI, forms, modals, auth guards
+|   +-- src/hooks/          # useAuth, useCookies, theme hooks
+|   +-- src/pages/          # route pages
+|   +-- public/downloads/   # generated extension ZIPs (ignored)
++-- server/                 # Laravel API
+|   +-- app/Http/           # controllers and Form Requests
+|   +-- app/Services/       # auth, cookies, password reset logic
+|   +-- app/Models/         # User and encrypted Cookie model
+|   +-- database/           # migrations, factories, seeders
+|   +-- tests/              # Pest/PHPUnit feature and unit tests
++-- extension/              # Chrome Manifest V3 extension
++-- scripts/                # Linux and PowerShell build scripts
++-- AGENTS.md               # contributor guidelines
 ```
-cookie-vault/
-├── server/                         # Laravel 12 API
-│   ├── app/Http/Controllers/       # AuthController, CookieController, ProfileController
-│   ├── app/Services/               # AuthService, CookieService, PasswordResetService
-│   ├── app/Mail/                   # ResetPassword (ShouldQueue)
-│   ├── app/Models/                 # User, Cookie (encrypted value)
-│   └── resources/views/emails/     # Reset password email template
-├── client/                         # React 19 SPA
-│   ├── src/api/                    # auth.js, cookies.js, client.js
-│   ├── src/hooks/                  # useAuth, useCookies
-│   ├── src/pages/                  # Home, Login, Register, ForgotPassword, ResetPassword, Dashboard
-│   ├── src/components/             # Navbar (with profile avatar), modals, forms
-│   └── public/downloads/           # Extension zip for download
-├── extension/                      # Chrome Extension (Manifest V3)
-│   ├── popup.html/css/js           # Main popup UI
-│   ├── manifest.json               # Extension config (incognito: spanning)
-│   └── background.js               # Service worker
-├── .agents/                        # PHP best practices skills
-├── CLAUDE.md
-└── README.md
-```
+
+## Security Notes
+
+- Never commit `.env`, `.env.testing`, tokens, generated ZIP downloads, `vendor/`, or `node_modules/`.
+- Keep test credentials in `server/.env.testing`; only `server/.env.testing.example` is committed.
+- Cookie values are encrypted before storage, but API responses can expose decrypted values to authenticated owners.
+- Extension rendering avoids injecting untrusted cookie data through dynamic HTML.
