@@ -11,6 +11,7 @@ use App\Services\PasswordResetService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Password;
 
 final class AuthController extends Controller
 {
@@ -67,7 +68,7 @@ final class AuthController extends Controller
         $request->validate([
             'email' => ['required', 'string', 'email'],
             'token' => ['required', 'string'],
-            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'password' => ['required', 'string', Password::min(12)->letters()->mixedCase()->numbers(), 'confirmed'],
         ]);
 
         $reset = $this->passwordResetService->reset(

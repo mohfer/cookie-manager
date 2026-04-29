@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build && cp public/.htaccess dist/.htaccess",
     "build:extension": "bash ../scripts/build-extension.sh",
+    "build:extension:win": "powershell -ExecutionPolicy Bypass -File ../scripts/build-extension.ps1",
     "lint": "eslint .",
     "preview": "vite preview"
   },

@@ -343,31 +343,11 @@ async function loadCookies() {
     }
 
     if (filtered.length === 0) {
-      listEl.innerHTML = `<div class="empty">No cookies${CURRENT_DOMAIN ? ' for ' + CURRENT_DOMAIN : ''}${searchVal ? ' matching "' + searchVal + '"' : ''}</div>`;
+      setEmptyState(listEl, `No cookies${CURRENT_DOMAIN ? ' for ' + CURRENT_DOMAIN : ''}${searchVal ? ' matching "' + searchVal + '"' : ''}`);
       return;
     }
 
-    listEl.innerHTML = filtered.map(cookie => {
-      const initial = (cookie.name || cookie.domain || '?').charAt(0).toUpperCase();
-      const faviconUrl = `https://${cookie.domain.replace(/^\./, '')}/favicon.ico`;
-
-      return `
-        <div class="cookie-item" data-id="${cookie.id}" data-domain="${cookie.domain}">
-          <div class="cookie-favicon-wrapper">
-            <img class="cookie-favicon" src="${faviconUrl}" alt="${escapeHtml(cookie.name)} icon" loading="lazy">
-            <div class="cookie-favicon-fallback">${escapeHtml(initial)}</div>
-          </div>
-          <div class="cookie-info">
-            <div class="cookie-name">${escapeHtml(cookie.name)}</div>
-            <div class="cookie-domain">${escapeHtml(cookie.domain)}</div>
-          </div>
-          <div class="cookie-actions">
-            <button class="btn-load" data-action="load" data-id="${cookie.id}" data-domain="${cookie.domain}" title="Load cookies to this site">Load</button>
-            <button class="btn-delete" data-action="delete" data-id="${cookie.id}" title="Delete">X</button>
-          </div>
-        </div>
-      `;
-    }).join('');
+    listEl.replaceChildren(...filtered.map(createCookieElement));
 
     listEl.querySelectorAll('[data-action="load"]').forEach(btn => {
       btn.addEventListener('click', () => handleLoadCookie(parseInt(btn.dataset.id)));
@@ -391,7 +371,7 @@ async function loadCookies() {
     });
 
   } catch (e) {
-    listEl.innerHTML = `<div class="empty">Error: ${escapeHtml(e.message)}</div>`;
+    setEmptyState(listEl, `Error: ${e.message}`);
   }
 }
 
@@ -470,6 +450,75 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str || '';
   return div.innerHTML;
+}
+
+function setEmptyState(container, message) {
+  const empty = document.createElement('div');
+  empty.className = 'empty';
+  empty.textContent = message;
+  container.replaceChildren(empty);
+}
+
+function createCookieElement(cookie) {
+  const item = document.createElement('div');
+  const domain = String(cookie.domain || '');
+  const name = String(cookie.name || '');
+  const cookieId = Number.parseInt(cookie.id, 10);
+  const faviconHost = domain.replace(/^\./, '').replace(/[^a-z0-9.-]/gi, '');
+  const initial = (name || domain || '?').charAt(0).toUpperCase();
+
+  item.className = 'cookie-item';
+  item.dataset.id = Number.isSafeInteger(cookieId) ? String(cookieId) : '';
+  item.dataset.domain = domain;
+
+  const faviconWrapper = document.createElement('div');
+  faviconWrapper.className = 'cookie-favicon-wrapper';
+
+  const favicon = document.createElement('img');
+  favicon.className = 'cookie-favicon';
+  favicon.src = `https://${faviconHost}/favicon.ico`;
+  favicon.alt = `${name} icon`;
+  favicon.loading = 'lazy';
+
+  const fallback = document.createElement('div');
+  fallback.className = 'cookie-favicon-fallback';
+  fallback.textContent = initial;
+
+  const info = document.createElement('div');
+  info.className = 'cookie-info';
+
+  const cookieName = document.createElement('div');
+  cookieName.className = 'cookie-name';
+  cookieName.textContent = name;
+
+  const cookieDomain = document.createElement('div');
+  cookieDomain.className = 'cookie-domain';
+  cookieDomain.textContent = domain;
+
+  const actions = document.createElement('div');
+  actions.className = 'cookie-actions';
+
+  const loadButton = document.createElement('button');
+  loadButton.className = 'btn-load';
+  loadButton.dataset.action = 'load';
+  loadButton.dataset.id = item.dataset.id;
+  loadButton.dataset.domain = domain;
+  loadButton.title = 'Load cookies to this site';
+  loadButton.textContent = 'Load';
+
+  const deleteButton = document.createElement('button');
+  deleteButton.className = 'btn-delete';
+  deleteButton.dataset.action = 'delete';
+  deleteButton.dataset.id = item.dataset.id;
+  deleteButton.title = 'Delete';
+  deleteButton.textContent = 'X';
+
+  faviconWrapper.append(favicon, fallback);
+  info.append(cookieName, cookieDomain);
+  actions.append(loadButton, deleteButton);
+  item.append(faviconWrapper, info, actions);
+
+  return item;
 }
 
 // ============ EVENT BINDINGS ============

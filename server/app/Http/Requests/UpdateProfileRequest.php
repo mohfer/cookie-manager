@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 final class UpdateProfileRequest extends FormRequest
 {
@@ -18,8 +20,8 @@ final class UpdateProfileRequest extends FormRequest
         $userId = $this->user()->id;
 
         return [
-            'email' => ['sometimes', 'required', 'string', 'email', 'max:255', "unique:users,email,{$userId}"],
-            'password' => ['sometimes', 'required', 'string', 'min:6', 'confirmed'],
+            'email' => ['sometimes', 'required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
+            'password' => ['sometimes', 'required', 'string', Password::min(12)->letters()->mixedCase()->numbers(), 'confirmed'],
         ];
     }
 }
