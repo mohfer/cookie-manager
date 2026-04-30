@@ -9,6 +9,8 @@ CookieVault has three main modules. `client/` is the React + Vite frontend; app 
 - `cd client && npm run dev`: start the Vite frontend dev server.
 - `cd client && npm run build`: build the frontend for production.
 - `cd client && npm run lint`: run ESLint over frontend code.
+- `cd client && npm test`: run Vitest tests for frontend.
+- `cd client && npm run test:watch`: run Vitest in watch mode.
 - `cd client && npm run build:extension`: package the extension on Linux/macOS.
 - `cd client && npm run build:extension:win`: package the extension on Windows via PowerShell.
 - `cd server && composer run dev`: run Laravel server, queue listener, and Vite together.
@@ -20,7 +22,7 @@ Use PHP 8.2+ with strict typing where existing files do. Keep Laravel controller
 
 ## Testing Guidelines
 
-Server tests use Laravel’s test runner with Pest/PHPUnit support and default to MySQL database `cookievault_test`. Create it locally before running `composer test`, or override `DB_*` variables in `phpunit.xml`/environment. Place feature tests in `server/tests/Feature/` and unit tests in `server/tests/Unit/`. Name tests after behavior, for example `CookieApiTest.php`. For frontend and extension changes, run `npm run lint` and manually verify the affected UI flow.
+Server tests use Laravel’s test runner with Pest/PHPUnit support and default to MySQL database `cookievault_test`. Create it locally before running `composer test`, or override `DB_*` variables in `phpunit.xml`/environment. Place feature tests in `server/tests/Feature/` and unit tests in `server/tests/Unit/`. Name tests after behavior, for example `CookieApiTest.php`. For frontend changes, run `npm test` to execute Vitest tests and `npm run lint` to check code style. For extension changes, manually verify the affected UI flow in Chrome.
 
 ## Commit & Pull Request Guidelines
 
