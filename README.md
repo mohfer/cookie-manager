@@ -98,7 +98,7 @@ php artisan key:generate --env=testing
 composer test
 ```
 
-Server tests cover auth flows, cookie CRUD, ownership isolation, validation, profile updates, token revocation, and encrypted cookie model behavior.
+Server tests cover auth flows, cookie CRUD, ownership isolation, validation, profile updates, token revocation, encrypted cookie model behavior, authorization policies, and duplicate prevention with unique constraints.
 
 ## API Endpoints
 

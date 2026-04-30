@@ -28,6 +28,7 @@ describe('AddCookieForm', () => {
       name: 'Example',
       domain: 'example.com',
       value: [{ name: 'sid', value: 'abc' }],
+      overwrite: false,
     })
     expect(screen.getByLabelText(/cookie name/i)).toHaveValue('')
   })
@@ -41,7 +42,12 @@ describe('AddCookieForm', () => {
     await userEvent.type(screen.getByLabelText(/cookie value/i), 'raw-value')
     await userEvent.click(screen.getByRole('button', { name: /add cookie/i }))
 
-    expect(onSubmit).toHaveBeenCalledWith({ name: 'Plain', domain: 'example.com', value: 'raw-value' })
+    expect(onSubmit).toHaveBeenCalledWith({
+      name: 'Plain',
+      domain: 'example.com',
+      value: 'raw-value',
+      overwrite: false,
+    })
   })
 
   it('shows submit errors and calls cancel handler', async () => {

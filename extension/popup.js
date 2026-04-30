@@ -277,21 +277,11 @@ async function handleSaveCookies() {
       storeId: c.storeId || null,
     }));
 
-    // Check if domain already exists
-    const existing = await apiCall('/api/cookies');
-    const existingForDomain = existing.data?.find(c => c.domain === CURRENT_DOMAIN);
-
-    if (existingForDomain) {
-      await apiCall(`/api/cookies/${existingForDomain.id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ name: cookieName, domain: CURRENT_DOMAIN, value: cookieValue }),
-      });
-    } else {
-      await apiCall('/api/cookies', {
-        method: 'POST',
-        body: JSON.stringify({ name: cookieName, domain: CURRENT_DOMAIN, value: cookieValue }),
-      });
-    }
+    // Create new cookie (no overwrite logic)
+    await apiCall('/api/cookies', {
+      method: 'POST',
+      body: JSON.stringify({ name: cookieName, domain: CURRENT_DOMAIN, value: cookieValue }),
+    });
 
     statusEl.className = 'status-msg success';
     statusEl.textContent = `Saved ${cookies.length} cookies for ${CURRENT_DOMAIN}`;
@@ -310,7 +300,6 @@ async function handleSaveCookies() {
     `;
   }
 }
-
 // ============ LOAD COOKIES LIST ============
 async function loadCookies() {
   const listEl = document.getElementById('cookie-list');

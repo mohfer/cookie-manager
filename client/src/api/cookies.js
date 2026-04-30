@@ -1,4 +1,4 @@
-import { apiFetch } from './client'
+﻿import { apiFetch } from './client'
 
 export const getCookiesApi = async () => {
     const res = await apiFetch('/api/cookies')

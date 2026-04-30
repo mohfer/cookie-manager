@@ -20,6 +20,14 @@ final class CookieService
         return $user->cookies()->whereKey($id)->first();
     }
 
+    public function findDuplicate(User $user, string $domain, string $name): ?Cookie
+    {
+        return $user->cookies()
+            ->where('domain', $domain)
+            ->where('name', $name)
+            ->first();
+    }
+
     public function createForUser(User $user, array $data): Cookie
     {
         return $user->cookies()->create($data);

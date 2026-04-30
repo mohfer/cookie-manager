@@ -69,7 +69,7 @@ it('prevents users from accessing cookies owned by another user', function () {
     $cookie = $owner->cookies()->create(cookiePayload());
 
     $this->actingAs($otherUser, 'sanctum')->getJson("/api/cookies/{$cookie->id}")->assertNotFound();
-    $this->actingAs($otherUser, 'sanctum')->putJson("/api/cookies/{$cookie->id}", cookiePayload(['name' => 'Hacked']))->assertNotFound();
+    $this->actingAs($otherUser, 'sanctum')->putJson("/api/cookies/{$cookie->id}", cookiePayload(['name' => 'Hacked']))->assertForbidden();
     $this->actingAs($otherUser, 'sanctum')->deleteJson("/api/cookies/{$cookie->id}")->assertNotFound();
 });
 
@@ -83,15 +83,52 @@ it('validates domains and cookie value shape', function () {
         ->assertJsonValidationErrors(['domain', 'value.0.sameSite']);
 });
 
-it('enforces per-user unique cookie names and domains', function () {
+it('prevents creating duplicate cookies with same domain and name', function () {
     $user = authUser();
     $otherUser = authUser();
 
+    // Create first cookie
     $this->actingAs($user, 'sanctum')->postJson('/api/cookies', cookiePayload())->assertCreated();
 
+    // Try to create duplicate (should fail with 422)
     $this->actingAs($user, 'sanctum')->postJson('/api/cookies', cookiePayload())
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors(['domain', 'name']);
+        ->assertStatus(422)
+        ->assertJsonPath('message', 'A cookie with this domain and name already exists. Please use a different name.');
 
+    // Other user can create same domain+name (different user_id)
     $this->actingAs($otherUser, 'sanctum')->postJson('/api/cookies', cookiePayload())->assertCreated();
+    
+    // User can create same domain with different name
+    $this->actingAs($user, 'sanctum')->postJson('/api/cookies', cookiePayload([
+        'name' => 'Different Name',
+        'domain' => 'example.com',
+    ]))->assertCreated();
+});
+
+it('prevents updating cookie to duplicate domain and name', function () {
+    $user = authUser();
+
+    // Create first cookie
+    $cookie1 = $this->actingAs($user, 'sanctum')->postJson('/api/cookies', cookiePayload([
+        'name' => 'Cookie One',
+        'domain' => 'example.com',
+    ]))->assertCreated()->json('data');
+
+    // Create second cookie with different name
+    $cookie2 = $this->actingAs($user, 'sanctum')->postJson('/api/cookies', cookiePayload([
+        'name' => 'Cookie Two',
+        'domain' => 'example.com',
+    ]))->assertCreated()->json('data');
+
+    // Try to update cookie2 to have same name as cookie1 (should fail)
+    $this->actingAs($user, 'sanctum')->putJson("/api/cookies/{$cookie2['id']}", [
+        'name' => 'Cookie One',
+        'domain' => 'example.com',
+    ])->assertStatus(422)
+        ->assertJsonPath('message', 'A cookie with this domain and name already exists. Please use a different name.');
+
+    // Verify cookie2 was not updated
+    $this->actingAs($user, 'sanctum')->getJson("/api/cookies/{$cookie2['id']}")
+        ->assertOk()
+        ->assertJsonPath('data.name', 'Cookie Two');
 });
